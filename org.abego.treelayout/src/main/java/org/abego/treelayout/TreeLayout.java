@@ -32,7 +32,6 @@ package org.abego.treelayout;
 
 import static org.abego.treelayout.internal.util.Contract.checkArg;
 
-import java.awt.geom.Point2D;
 import java.awt.geom.Rectangle2D;
 import java.io.PrintStream;
 import java.util.ArrayList;
@@ -286,7 +285,7 @@ public class TreeLayout<TreeNode> {
 	 * left most node bounds will start at x = 0, the top most node bounds at y
 	 * = 0.
 	 */
-	private class NormalizedPosition extends Point2D {
+	private class NormalizedPosition {
 		private double x_relativeToRoot;
 		private double y_relativeToRoot;
 
@@ -295,17 +294,14 @@ public class TreeLayout<TreeNode> {
 			setLocation(x_relativeToRoot, y_relativeToRoot);
 		}
 
-		@Override
 		public double getX() {
 			return x_relativeToRoot - boundsLeft;
 		}
 
-		@Override
 		public double getY() {
 			return y_relativeToRoot - boundsTop;
 		}
 
-		@Override
 		// never called from outside
 		public void setLocation(double x_relativeToRoot, double y_relativeToRoot) {
 			this.x_relativeToRoot = x_relativeToRoot;
@@ -325,7 +321,7 @@ public class TreeLayout<TreeNode> {
 	private final Map<TreeNode, Double> shift;
 	private final Map<TreeNode, TreeNode> ancestor;
 	private final Map<TreeNode, Integer> number;
-	private final Map<TreeNode, Point2D> positions;
+	private final Map<TreeNode, NormalizedPosition> positions;
 
 	private double getMod(TreeNode node) {
 		Double d = mod.get(node);
@@ -702,9 +698,9 @@ public class TreeLayout<TreeNode> {
 		if (nodeBounds == null) {
 			nodeBounds = this.useIdentity ? new IdentityHashMap<TreeNode, Rectangle2D.Double>()
 					: new HashMap<TreeNode, Rectangle2D.Double>();
-			for (Entry<TreeNode, Point2D> entry : positions.entrySet()) {
+			for (Entry<TreeNode, NormalizedPosition> entry : positions.entrySet()) {
 				TreeNode node = entry.getKey();
-				Point2D pos = entry.getValue();
+				NormalizedPosition pos = entry.getValue();
 				double w = getNodeWidth(node);
 				double h = getNodeHeight(node);
 				double x = pos.getX() - w / 2;
@@ -748,7 +744,7 @@ public class TreeLayout<TreeNode> {
 			this.shift = new IdentityHashMap<TreeNode, Double>();
 			this.ancestor = new IdentityHashMap<TreeNode, TreeNode>();
 			this.number = new IdentityHashMap<TreeNode, Integer>();
-			this.positions = new IdentityHashMap<TreeNode, Point2D>();
+			this.positions = new IdentityHashMap<TreeNode, NormalizedPosition>();
 		} else {
 			this.mod = new HashMap<TreeNode, Double>();
 			this.thread = new HashMap<TreeNode, TreeNode>();
@@ -757,7 +753,7 @@ public class TreeLayout<TreeNode> {
 			this.shift = new HashMap<TreeNode, Double>();
 			this.ancestor = new HashMap<TreeNode, TreeNode>();
 			this.number = new HashMap<TreeNode, Integer>();
-			this.positions = new HashMap<TreeNode, Point2D>();
+			this.positions = new HashMap<TreeNode, NormalizedPosition>();
 		}
 		
 		// No need to explicitly set mod, thread and ancestor as their getters

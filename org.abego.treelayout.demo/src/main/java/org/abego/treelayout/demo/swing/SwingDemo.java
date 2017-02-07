@@ -29,14 +29,7 @@
  */
 package org.abego.treelayout.demo.swing;
 
-import java.awt.Container;
-
-import javax.swing.BorderFactory;
-import javax.swing.JComponent;
-import javax.swing.JDialog;
-
 import javafx.application.Application;
-import javafx.scene.Group;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
 import org.abego.treelayout.TreeForTreeLayout;
@@ -57,7 +50,7 @@ import org.abego.treelayout.util.DefaultConfiguration;
  * Screenshot:
  * <p>
  * <img src="doc-files/swingdemo.png" alt="A tree rendered using Swing">
- * 
+ *
  * @author Udo Borkowski (ub@abego.org)
  */
 public class SwingDemo extends Application {
