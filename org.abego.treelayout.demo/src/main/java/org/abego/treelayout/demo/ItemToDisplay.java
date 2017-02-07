@@ -6,20 +6,13 @@ import javafx.scene.shape.Shape;
 
 import static javafx.scene.paint.Color.BLACK;
 
-public class ItemToDisplay<T> implements IItemToDisplay {
+public class ItemToDisplay implements IItemToDisplay {
 
-	public static final int RADIUS = 25;
-
-	public final Color text;
-	public final int height;
-	public final int width;
+	private static final int RADIUS = 50;
 
 	private final Circle circle = new Circle(RADIUS);
 
-	public ItemToDisplay(Color color, int width, int height) {
-		this.text = color;
-		this.width = width;
-		this.height = height;
+	public ItemToDisplay(Color color) {
 		circle.setFill(color);
 		circle.setStroke(BLACK);
 	}
@@ -29,10 +22,10 @@ public class ItemToDisplay<T> implements IItemToDisplay {
 	}
 
 	public double getWidth() {
-		return width;
+		return circle.getRadius();
 	}
 
-	public double getLength() {
-		return height;
+	public double getHeight() {
+		return circle.getRadius();
 	}
 }

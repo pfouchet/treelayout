@@ -44,14 +44,14 @@ public class SampleTreeFactory {
 	 * @return a "Sample" tree with {@link ItemToDisplay} items as nodes.
 	 */
 	public static TreeForTreeLayout<ItemToDisplay> createSampleTree2() {
-		ItemToDisplay root = new ItemToDisplay<String>(Color.BLACK, 40, 20);
-		ItemToDisplay n1 = new ItemToDisplay<String>(Color.BLUE, 65, 20);
-		ItemToDisplay n1_3 = new ItemToDisplay<String>(Color.GREEN, 20, 20);
-		ItemToDisplay n1_4 = new ItemToDisplay<String>(Color.YELLOW, 60, 20);
-		ItemToDisplay n1_5 = new ItemToDisplay<String>(Color.RED, 60, 20);
-		ItemToDisplay n1_5_1 = new ItemToDisplay<String>(Color.GREY, 90, 20);
-		ItemToDisplay n1_6 = new ItemToDisplay<String>(Color.GREENYELLOW, 60, 20);
-		ItemToDisplay n1_6_1 = new ItemToDisplay<String>(Color.PINK, 30, 20);
+		ItemToDisplay root = new ItemToDisplay(Color.BLACK);
+		ItemToDisplay n1 = new ItemToDisplay(Color.BLUE);
+		ItemToDisplay n1_3 = new ItemToDisplay(Color.GREEN);
+		ItemToDisplay n1_4 = new ItemToDisplay(Color.YELLOW);
+		ItemToDisplay n1_5 = new ItemToDisplay(Color.RED);
+		ItemToDisplay n1_5_1 = new ItemToDisplay(Color.GREY);
+		ItemToDisplay n1_6 = new ItemToDisplay(Color.GREENYELLOW);
+		ItemToDisplay n1_6_1 = new ItemToDisplay(Color.PINK);
 
 
 		DefaultTreeForTreeLayout<ItemToDisplay> tree = new DefaultTreeForTreeLayout<ItemToDisplay>(

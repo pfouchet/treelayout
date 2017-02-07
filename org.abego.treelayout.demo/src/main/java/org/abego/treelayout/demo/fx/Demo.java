@@ -48,9 +48,9 @@ public class Demo extends Application {
 		// TODO replace by getter/setter so that it can be updated at runtime
 		// setup the tree layout configuration
 		double gapBetweenLevels = 150;
-		double gapBetweenNodes = 50;
+		double gapBetweenCenterOfNodes = 150;
 		DefaultConfiguration<ItemToDisplay> configuration = new DefaultConfiguration<ItemToDisplay>(
-				gapBetweenLevels, gapBetweenNodes, Configuration.Location.Left);
+				gapBetweenLevels, gapBetweenCenterOfNodes, Configuration.Location.Left);
 
 		// create the NodeExtentProvider for ItemToDisplay nodes
 		TextInBoxNodeExtentProvider nodeExtentProvider = new TextInBoxNodeExtentProvider();
@@ -61,9 +61,6 @@ public class Demo extends Application {
 
 		// Create a panel that draws the nodes and edges and show the panel
 		MainTreePane panel = new MainTreePane(treeLayout);
-
-		primaryStage.setMinHeight(800);
-		primaryStage.setMinWidth(800);
 
 		primaryStage.setScene(new Scene(panel));
 

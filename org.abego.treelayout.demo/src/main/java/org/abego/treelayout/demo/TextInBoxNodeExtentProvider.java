@@ -43,10 +43,10 @@ public class TextInBoxNodeExtentProvider implements
 		NodeExtentProvider<ItemToDisplay> {
 
 	public double getWidth(ItemToDisplay treeNode) {
-		return treeNode.width;
+		return treeNode.getWidth();
 	}
 
 	public double getHeight(ItemToDisplay treeNode) {
-		return treeNode.height;
+		return treeNode.getHeight();
 	}
 }
