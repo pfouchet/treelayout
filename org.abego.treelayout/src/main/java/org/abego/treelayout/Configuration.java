@@ -47,7 +47,7 @@ public interface Configuration<TreeNode> {
 	/**
 	 * Identifies the sides of a rectangle (top, left, ...)
 	 */
-	public enum Location {
+	enum Location {
 		Top, Left, Bottom, Right
 	}
 
@@ -84,7 +84,7 @@ public interface Configuration<TreeNode> {
 	 * Possible alignments of a node within a level (centered, towards or away
 	 * from root)
 	 */
-	public enum AlignmentInLevel {
+	enum AlignmentInLevel {
 		Center, TowardsRoot, AwayFromRoot
 	}
 

@@ -29,35 +29,34 @@
  */
 package org.abego.treelayout.util;
 
-import static org.abego.treelayout.internal.util.Contract.checkArg;
-
 import org.abego.treelayout.Configuration;
+
+import static org.abego.treelayout.internal.util.Contract.checkArg;
 
 /**
  * Specify a {@link Configuration} through configurable parameters, or falling
  * back to some frequently used defaults.
- * 
- * @author Udo Borkowski (ub@abego.org)
- * 
- * 
- * @param <TreeNode> Type of elements used as nodes in the tree
+ * TODO make it as a builder
  */
 public class DefaultConfiguration<TreeNode> implements
 		Configuration<TreeNode> {
 
+	private final Location location;
+	private double gapBetweenLevels;
+	private double gapBetweenNodes;
+	private AlignmentInLevel alignmentInLevel;
+
 	/**
 	 * Specifies the constants to be used for this Configuration.
-	 * 
+	 *
 	 * @param gapBetweenLevels &nbsp;
-	 * @param gapBetweenNodes &nbsp;
-	 * @param location
-	 *            [default: {@link org.abego.treelayout.Configuration.Location#Top Top}]
-	 * @param alignmentInLevel
-	 *            [default: {@link org.abego.treelayout.Configuration.AlignmentInLevel#Center Center}]
+	 * @param gapBetweenNodes  &nbsp;
+	 * @param location         [default: {@link org.abego.treelayout.Configuration.Location#Top Top}]
+	 * @param alignmentInLevel [default: {@link org.abego.treelayout.Configuration.AlignmentInLevel#Center Center}]
 	 */
 	public DefaultConfiguration(double gapBetweenLevels,
-			double gapBetweenNodes, Location location,
-			AlignmentInLevel alignmentInLevel) {
+								double gapBetweenNodes, Location location,
+								AlignmentInLevel alignmentInLevel) {
 		checkArg(gapBetweenLevels >= 0, "gapBetweenLevels must be >= 0");
 		checkArg(gapBetweenNodes >= 0, "gapBetweenNodes must be >= 0");
 
@@ -67,21 +66,45 @@ public class DefaultConfiguration<TreeNode> implements
 		this.alignmentInLevel = alignmentInLevel;
 	}
 
+	// -----------------------------------------------------------------------
+	// gapBetweenLevels
+
 	/**
 	 * Convenience constructor, using a default for the alignmentInLevel.
 	 * <p>
 	 * see
 	 * {@link #DefaultConfiguration(double, double, org.abego.treelayout.Configuration.Location, org.abego.treelayout.Configuration.AlignmentInLevel)}
 	 * </p>
-     * @param gapBetweenLevels &nbsp;
-     * @param gapBetweenNodes &nbsp;
-     * @param location &nbsp;
+	 *
+	 * @param gapBetweenLevels &nbsp;
+	 * @param gapBetweenNodes  &nbsp;
+	 * @param location         &nbsp;
 	 */
 	public DefaultConfiguration(double gapBetweenLevels,
-			double gapBetweenNodes, Location location) {
+								double gapBetweenNodes, Location location) {
 		this(gapBetweenLevels, gapBetweenNodes, location,
 				AlignmentInLevel.Center);
 	}
+
+	/**
+	 * Convenience constructor, using a default for the rootLocation and the
+	 * alignmentInLevel.
+	 * <p>
+	 * see
+	 * {@link #DefaultConfiguration(double, double, org.abego.treelayout.Configuration.Location, org.abego.treelayout.Configuration.AlignmentInLevel)}
+	 * </p>
+	 *
+	 * @param gapBetweenLevels &nbsp;
+	 * @param gapBetweenNodes  &nbsp;
+	 */
+	public DefaultConfiguration(double gapBetweenLevels,
+								double gapBetweenNodes) {
+		this(gapBetweenLevels, gapBetweenNodes, Location.Top,
+				AlignmentInLevel.Center);
+	}
+
+	// -----------------------------------------------------------------------
+	// gapBetweenNodes
 
 	public void setGapBetweenLevels(double gapBetweenLevels) {
 		this.gapBetweenLevels = gapBetweenLevels;
@@ -91,53 +114,23 @@ public class DefaultConfiguration<TreeNode> implements
 		this.gapBetweenNodes = gapBetweenNodes;
 	}
 
-	/**
-	 * Convenience constructor, using a default for the rootLocation and the
-	 * alignmentInLevel.
-	 * <p>
-	 * see
-	 * {@link #DefaultConfiguration(double, double,  org.abego.treelayout.Configuration.Location, org.abego.treelayout.Configuration.AlignmentInLevel)}
-	 * </p>
-     * @param gapBetweenLevels &nbsp;
-     * @param gapBetweenNodes &nbsp;
-	 */
-	public DefaultConfiguration(double gapBetweenLevels,
-			double gapBetweenNodes) {
-		this(gapBetweenLevels, gapBetweenNodes, Location.Top,
-				AlignmentInLevel.Center);
-	}
-
 	// -----------------------------------------------------------------------
-	// gapBetweenLevels
-
-	private double gapBetweenLevels;
+	// location
 
 	public double getGapBetweenLevels(int nextLevel) {
 		return gapBetweenLevels;
 	}
-
-	// -----------------------------------------------------------------------
-	// gapBetweenNodes
-
-	private double gapBetweenNodes;
 
 	public double getGapBetweenNodes(TreeNode node1, TreeNode node2) {
 		return gapBetweenNodes;
 	}
 
 	// -----------------------------------------------------------------------
-	// location
-
-	private final Location location;
+	// alignmentInLevel
 
 	public Location getRootLocation() {
 		return location;
 	}
-
-	// -----------------------------------------------------------------------
-	// alignmentInLevel
-
-	private AlignmentInLevel alignmentInLevel;
 
 	public AlignmentInLevel getAlignmentInLevel() {
 		return alignmentInLevel;
