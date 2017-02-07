@@ -35,6 +35,10 @@ import javax.swing.BorderFactory;
 import javax.swing.JComponent;
 import javax.swing.JDialog;
 
+import javafx.application.Application;
+import javafx.scene.Group;
+import javafx.scene.Scene;
+import javafx.stage.Stage;
 import org.abego.treelayout.TreeForTreeLayout;
 import org.abego.treelayout.TreeLayout;
 import org.abego.treelayout.demo.SampleTreeFactory;
@@ -56,46 +60,14 @@ import org.abego.treelayout.util.DefaultConfiguration;
  * 
  * @author Udo Borkowski (ub@abego.org)
  */
-public class SwingDemo {
+public class SwingDemo extends Application {
 
-	private static void showInDialog(JComponent panel) {
-		JDialog dialog = new JDialog();
-		Container contentPane = dialog.getContentPane();
-		((JComponent) contentPane).setBorder(BorderFactory.createEmptyBorder(
-				10, 10, 10, 10));
-		contentPane.add(panel);
-		dialog.pack();
-		dialog.setLocationRelativeTo(null);
-		dialog.setVisible(true);
-	}
+	public void start(Stage primaryStage) throws Exception {
+		TreeForTreeLayout<TextInBox> tree = SampleTreeFactory.createSampleTree2();
 
-	private static TreeForTreeLayout<TextInBox> getSampleTree(String treeName) {
-		TreeForTreeLayout<TextInBox> tree;
-		if (treeName.equals("2")) {
-			tree = SampleTreeFactory.createSampleTree2();
-		} else if (treeName.equals("")) {
-			tree = SampleTreeFactory.createSampleTree();
-		} else {
-			throw new RuntimeException(String.format("Invalid tree name: '%s'",
-					treeName));
-		}
-		return tree;
-	}
-
-	/**
-	 * Shows a dialog with a tree in a layout created by {@link TreeLayout},
-	 * using the Swing component {@link TextInBoxTreePane}.
-	 * 
-	 * @param args args[0]: treeName (default="")
-	 */
-	public static void main(String[] args) {
-		// get the sample tree
-		String treeName = (args.length > 0) ? args[0] : "";
-		TreeForTreeLayout<TextInBox> tree = getSampleTree(treeName);
-				
 		// setup the tree layout configuration
-		double gapBetweenLevels = 50;
-		double gapBetweenNodes = 10;
+		double gapBetweenLevels = 150;
+		double gapBetweenNodes = 50;
 		DefaultConfiguration<TextInBox> configuration = new DefaultConfiguration<TextInBox>(
 				gapBetweenLevels, gapBetweenNodes);
 
@@ -108,6 +80,13 @@ public class SwingDemo {
 
 		// Create a panel that draws the nodes and edges and show the panel
 		TextInBoxTreePane panel = new TextInBoxTreePane(treeLayout);
-		showInDialog(panel);
+
+		primaryStage.setMinHeight(800);
+		primaryStage.setMinWidth(800);
+
+		primaryStage.setScene(new Scene(panel));
+
+		primaryStage.centerOnScreen();
+		primaryStage.show();
 	}
 }

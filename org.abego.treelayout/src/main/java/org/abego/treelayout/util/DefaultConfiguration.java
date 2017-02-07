@@ -83,6 +83,14 @@ public class DefaultConfiguration<TreeNode> implements
 				AlignmentInLevel.Center);
 	}
 
+	public void setGapBetweenLevels(double gapBetweenLevels) {
+		this.gapBetweenLevels = gapBetweenLevels;
+	}
+
+	public void setGapBetweenNodes(double gapBetweenNodes) {
+		this.gapBetweenNodes = gapBetweenNodes;
+	}
+
 	/**
 	 * Convenience constructor, using a default for the rootLocation and the
 	 * alignmentInLevel.
@@ -102,9 +110,8 @@ public class DefaultConfiguration<TreeNode> implements
 	// -----------------------------------------------------------------------
 	// gapBetweenLevels
 
-	private final double gapBetweenLevels;
+	private double gapBetweenLevels;
 
-	@Override
 	public double getGapBetweenLevels(int nextLevel) {
 		return gapBetweenLevels;
 	}
@@ -112,9 +119,8 @@ public class DefaultConfiguration<TreeNode> implements
 	// -----------------------------------------------------------------------
 	// gapBetweenNodes
 
-	private final double gapBetweenNodes;
+	private double gapBetweenNodes;
 
-	@Override
 	public double getGapBetweenNodes(TreeNode node1, TreeNode node2) {
 		return gapBetweenNodes;
 	}
@@ -124,7 +130,6 @@ public class DefaultConfiguration<TreeNode> implements
 
 	private final Location location;
 
-	@Override
 	public Location getRootLocation() {
 		return location;
 	}
@@ -134,7 +139,6 @@ public class DefaultConfiguration<TreeNode> implements
 
 	private AlignmentInLevel alignmentInLevel;
 
-	@Override
 	public AlignmentInLevel getAlignmentInLevel() {
 		return alignmentInLevel;
 	}
