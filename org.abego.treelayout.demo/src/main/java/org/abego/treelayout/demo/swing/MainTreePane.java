@@ -35,25 +35,14 @@ import javafx.scene.layout.Pane;
 import javafx.scene.shape.Circle;
 import org.abego.treelayout.TreeForTreeLayout;
 import org.abego.treelayout.TreeLayout;
-import org.abego.treelayout.demo.TextInBox;
+import org.abego.treelayout.demo.ItemToDisplay;
 
-import java.awt.*;
-
-/**
- * A JComponent displaying a tree of TextInBoxes, given by a {@link TreeLayout}.
- *
- * @author Udo Borkowski (ub@abego.org)
- */
-public class TextInBoxTreePane extends Pane {
-
-	private static final int Y_OFFSET = 20;
+public class MainTreePane extends Pane {
 
 	public static final int RADIUS = 25;
+	private static final int Y_OFFSET = 20;
 	public final Canvas canvas;
-	private final TreeLayout<TextInBox> treeLayout;
-
-	// -------------------------------------------------------------------
-	// painting
+	private final TreeLayout<ItemToDisplay> treeLayout;
 
 	/**
 	 * Specifies the tree to be displayed by passing in a {@link TreeLayout} for
@@ -61,35 +50,33 @@ public class TextInBoxTreePane extends Pane {
 	 *
 	 * @param treeLayout the {@link TreeLayout} to be displayed
 	 */
-	public TextInBoxTreePane(TreeLayout<TextInBox> treeLayout) {
+	public MainTreePane(TreeLayout<ItemToDisplay> treeLayout) {
 		this.treeLayout = treeLayout;
 
-		Dimension size = treeLayout.getBounds().getBounds().getSize();
-
-		canvas = new Canvas(size.width, size.height);
+		canvas = new Canvas(treeLayout.getBounds().getWidth(), treeLayout.getBounds().getHeight());
 		GraphicsContext gd = canvas.getGraphicsContext2D();
 		getChildren().add(canvas);
 		paintEdges(gd, getTree().getRoot());
 
 		// paint the boxes
-		for (TextInBox textInBox : treeLayout.getNodeBounds().keySet()) {
-			paintBox(textInBox);
+		for (ItemToDisplay itemToDisplay : treeLayout.getNodeBounds().keySet()) {
+			paintBox(itemToDisplay);
 		}
 	}
 
-	private TreeForTreeLayout<TextInBox> getTree() {
+	private TreeForTreeLayout<ItemToDisplay> getTree() {
 		return treeLayout.getTree();
 	}
 
-	private Iterable<TextInBox> getChildren(TextInBox parent) {
+	private Iterable<ItemToDisplay> getChildren(ItemToDisplay parent) {
 		return getTree().getChildren(parent);
 	}
 
-	private TreeLayout.Rectangle2DCustom getBoundsOfNode(TextInBox node) {
+	private TreeLayout.Rectangle2DCustom getBoundsOfNode(ItemToDisplay node) {
 		return treeLayout.getNodeBounds().get(node);
 	}
 
-	private void paintEdges(GraphicsContext g, TextInBox parent) {
+	private void paintEdges(GraphicsContext g, ItemToDisplay parent) {
 		g.setLineWidth(2);
 		g.setFill(javafx.scene.paint.Color.GREEN);
 		g.setStroke(javafx.scene.paint.Color.BLUE);
@@ -97,7 +84,7 @@ public class TextInBoxTreePane extends Pane {
 			TreeLayout.Rectangle2DCustom b1 = getBoundsOfNode(parent);
 			double x1 = b1.getCenterX();
 			double y1 = b1.getCenterY();
-			for (TextInBox child : getChildren(parent)) {
+			for (ItemToDisplay child : getChildren(parent)) {
 				TreeLayout.Rectangle2DCustom b2 = getBoundsOfNode(child);
 				g.strokeLine((int) x1, (int) y1 + Y_OFFSET, (int) b2.getCenterX(),
 						(int) b2.getCenterY() + Y_OFFSET);
@@ -107,12 +94,12 @@ public class TextInBoxTreePane extends Pane {
 		}
 	}
 
-	private void paintBox(TextInBox textInBox) {
+	private void paintBox(ItemToDisplay itemToDisplay) {
 
 		Circle circle = new Circle(RADIUS);
-		TreeLayout.Rectangle2DCustom box = getBoundsOfNode(textInBox);
-		circle.setCenterX(box.getX() + box.getWidth()/ 2);
-		circle.setCenterY(box.getY() + box.getHeight() / 2 + Y_OFFSET);
+		TreeLayout.Rectangle2DCustom box = getBoundsOfNode(itemToDisplay);
+		circle.setCenterX(box.getCenterX());
+		circle.setCenterY(box.getCenterY() + Y_OFFSET);
 		getChildren().add(circle);
 		circle.toFront();
 	}

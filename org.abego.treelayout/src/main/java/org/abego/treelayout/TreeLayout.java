@@ -32,10 +32,7 @@ package org.abego.treelayout;
 
 import org.abego.treelayout.Configuration.AlignmentInLevel;
 import org.abego.treelayout.Configuration.Location;
-import org.abego.treelayout.internal.util.java.lang.string.StringUtil;
 
-import java.awt.geom.Rectangle2D;
-import java.io.PrintStream;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.IdentityHashMap;
@@ -749,121 +746,44 @@ public class TreeLayout<TreeNode> {
 		addUniqueNodes(nodes, tree.getRoot());
 	}
 
-	// ------------------------------------------------------------------------
-	// checkTree
+	public static class Rectangle2DCustom {
 
-	private void dumpTree(PrintStream output, TreeNode node, int indent,
-						  DumpConfiguration dumpConfiguration) {
-		StringBuilder sb = new StringBuilder();
-		for (int i = 0; i < indent; i++) {
-			sb.append(dumpConfiguration.indent);
-		}
-
-		if (dumpConfiguration.includeObjectToString) {
-			sb.append("[");
-			sb.append(node.getClass().getName() + "@"
-					+ Integer.toHexString(node.hashCode()));
-			if (node.hashCode() != System.identityHashCode(node)) {
-				sb.append("/identityHashCode:");
-				sb.append(Integer.toHexString(System.identityHashCode(node)));
-			}
-			sb.append("]");
-		}
-
-		sb.append(StringUtil.quote(node != null ? node.toString() : null));
-
-		if (dumpConfiguration.includeNodeSize) {
-			sb.append(" (size: ");
-			sb.append(getNodeWidth(node));
-			sb.append("x");
-			sb.append(getNodeHeight(node));
-			sb.append(")");
-		}
-
-		output.println(sb.toString());
-
-		for (TreeNode n : tree.getChildren(node)) {
-			dumpTree(output, n, indent + 1, dumpConfiguration);
-		}
-	}
-
-	/**
-	 * Prints a dump of the tree to the given printStream, using the node's
-	 * "toString" method.
-	 *
-	 * @param printStream       &nbsp;
-	 * @param dumpConfiguration [default: new DumpConfiguration()]
-	 */
-	public void dumpTree(PrintStream printStream, DumpConfiguration dumpConfiguration) {
-		dumpTree(printStream, tree.getRoot(), 0, dumpConfiguration);
-	}
-
-	// ------------------------------------------------------------------------
-	// dumpTree
-
-	public void dumpTree(PrintStream printStream) {
-		dumpTree(printStream, new DumpConfiguration());
-	}
-
-	public static class Rectangle2DCustom extends Rectangle2D.Double{
-		public Rectangle2DCustom() {
-		}
+		private double x;
+		private double y;
+		private double width;
+		private double height;
 
 		public Rectangle2DCustom(double x, double y, double w, double h) {
-			super(x, y, w, h);
+			this.x = x;
+			this.y = y;
+			this.width = w;
+			this.height = h;
 		}
 
-		//		private double x;
-//		private double y;
-//		private double width;
-//		private double height;
-//
-//		public Rectangle2DCustom(double x, double y, double w, double h) {
-//			this.x = x;
-//			this.y = y;
-//			this.width = w;
-//			this.height = h;
-//		}
-//
-//		public double getX() {
-//			return x;
-//		}
-//
-//		public double getY() {
-//			return y;
-//		}
-//
-//		public double getWidth() {
-//			return width;
-//		}
-//
-//		public double getHeight() {
-//			return height;
-//		}
-//
-//		public double getCenterX() {
-//			return (x + width) / 2.0;
-//		}
-//
-//		public double getCenterY() {
-//			return (y + height) / 2.0;
-//		}
-//
-//		public Rectangle getBounds() {
-//			double width = getWidth();
-//			double height = getHeight();
-//			if (width < 0 || height < 0) {
-//				return new Rectangle();
-//			}
-//			double x = getX();
-//			double y = getY();
-//			double x1 = Math.floor(x);
-//			double y1 = Math.floor(y);
-//			double x2 = Math.ceil(x + width);
-//			double y2 = Math.ceil(y + height);
-//			return new Rectangle((int) x1, (int) y1,
-//					(int) (x2 - x1), (int) (y2 - y1));
-//		}
+		public double getX() {
+			return x;
+		}
+
+		public double getY() {
+			return y;
+		}
+
+
+		public double getWidth() {
+			return width;
+		}
+
+		public double getHeight() {
+			return height;
+		}
+
+		public double getCenterX() {
+			return getX() + getWidth() / 2.0;
+		}
+
+		public double getCenterY() {
+			return getY() + getHeight() / 2.0;
+		}
 	}
 
 	public static class DumpConfiguration {

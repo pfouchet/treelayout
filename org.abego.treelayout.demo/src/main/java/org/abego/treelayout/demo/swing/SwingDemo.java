@@ -34,8 +34,8 @@ import javafx.scene.Scene;
 import javafx.stage.Stage;
 import org.abego.treelayout.TreeForTreeLayout;
 import org.abego.treelayout.TreeLayout;
+import org.abego.treelayout.demo.ItemToDisplay;
 import org.abego.treelayout.demo.SampleTreeFactory;
-import org.abego.treelayout.demo.TextInBox;
 import org.abego.treelayout.demo.TextInBoxNodeExtentProvider;
 import org.abego.treelayout.util.DefaultConfiguration;
 
@@ -56,23 +56,23 @@ import org.abego.treelayout.util.DefaultConfiguration;
 public class SwingDemo extends Application {
 
 	public void start(Stage primaryStage) throws Exception {
-		TreeForTreeLayout<TextInBox> tree = SampleTreeFactory.createSampleTree2();
+		TreeForTreeLayout<ItemToDisplay> tree = SampleTreeFactory.createSampleTree2();
 
 		// setup the tree layout configuration
 		double gapBetweenLevels = 150;
 		double gapBetweenNodes = 50;
-		DefaultConfiguration<TextInBox> configuration = new DefaultConfiguration<TextInBox>(
+		DefaultConfiguration<ItemToDisplay> configuration = new DefaultConfiguration<ItemToDisplay>(
 				gapBetweenLevels, gapBetweenNodes);
 
-		// create the NodeExtentProvider for TextInBox nodes
+		// create the NodeExtentProvider for ItemToDisplay nodes
 		TextInBoxNodeExtentProvider nodeExtentProvider = new TextInBoxNodeExtentProvider();
 
 		// create the layout
-		TreeLayout<TextInBox> treeLayout = new TreeLayout<TextInBox>(tree,
+		TreeLayout<ItemToDisplay> treeLayout = new TreeLayout<ItemToDisplay>(tree,
 				nodeExtentProvider, configuration);
 
 		// Create a panel that draws the nodes and edges and show the panel
-		TextInBoxTreePane panel = new TextInBoxTreePane(treeLayout);
+		MainTreePane panel = new MainTreePane(treeLayout);
 
 		primaryStage.setMinHeight(800);
 		primaryStage.setMinWidth(800);

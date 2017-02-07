@@ -32,21 +32,21 @@ package org.abego.treelayout.demo;
 import org.abego.treelayout.NodeExtentProvider;
 
 /**
- * A {@link NodeExtentProvider} for nodes of type {@link TextInBox}.
+ * A {@link NodeExtentProvider} for nodes of type {@link ItemToDisplay}.
  * <p>
  * As one would expect this NodeExtentProvider returns the width and height as
- * specified with each TextInBox.
+ * specified with each ItemToDisplay.
  *
  * @author Udo Borkowski (ub@abego.org)
  */
 public class TextInBoxNodeExtentProvider implements
-		NodeExtentProvider<TextInBox> {
+		NodeExtentProvider<ItemToDisplay> {
 
-	public double getWidth(TextInBox treeNode) {
+	public double getWidth(ItemToDisplay treeNode) {
 		return treeNode.width;
 	}
 
-	public double getHeight(TextInBox treeNode) {
+	public double getHeight(ItemToDisplay treeNode) {
 		return treeNode.height;
 	}
 }
