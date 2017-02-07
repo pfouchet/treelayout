@@ -29,16 +29,14 @@
  */
 package org.abego.treelayout.demo.fx;
 
-import javafx.scene.canvas.Canvas;
-import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.layout.Pane;
+import javafx.scene.shape.Line;
 import org.abego.treelayout.TreeForTreeLayout;
 import org.abego.treelayout.TreeLayout;
 import org.abego.treelayout.demo.ItemToDisplay;
 
 public class MainTreePane extends Pane {
 	private static final int Y_OFFSET = 20;
-	public final Canvas canvas;
 	private final TreeLayout<ItemToDisplay> treeLayout;
 
 
@@ -51,13 +49,7 @@ public class MainTreePane extends Pane {
 	public MainTreePane(TreeLayout<ItemToDisplay> treeLayout) {
 		this.treeLayout = treeLayout;
 
-		canvas = new Canvas(treeLayout.getBounds().getWidth(), treeLayout.getBounds().getHeight());
-		GraphicsContext gd = canvas.getGraphicsContext2D();
-		getChildren().add(canvas);
-		gd.setLineWidth(2);
-		gd.setFill(javafx.scene.paint.Color.GREEN);
-		gd.setStroke(javafx.scene.paint.Color.BLUE);
-		paintEdges(gd, getTree().getRoot());
+		paintEdges(getTree().getRoot());
 
 		// paint the boxes
 		for (ItemToDisplay itemToDisplay : treeLayout.getNodeBounds().keySet()) {
@@ -77,7 +69,7 @@ public class MainTreePane extends Pane {
 		return treeLayout.getNodeBounds().get(node);
 	}
 
-	private void paintEdges(GraphicsContext g, ItemToDisplay parent) {
+	private void paintEdges(ItemToDisplay parent) {
 
 		if (!getTree().isLeaf(parent)) {
 			TreeLayout.Rectangle2DCustom b1 = getBoundsOfNode(parent);
@@ -85,10 +77,10 @@ public class MainTreePane extends Pane {
 			double y1 = b1.getCenterY();
 			for (ItemToDisplay child : getChildren(parent)) {
 				TreeLayout.Rectangle2DCustom b2 = getBoundsOfNode(child);
-				g.strokeLine((int) x1 + getXOffset(), (int) y1 + getYOffset(), (int) b2.getCenterX() + getXOffset(),
-						(int) b2.getCenterY() + getYOffset());
+				getChildren().add(new Line((int) x1 + getXOffset(), (int) y1 + getYOffset(), (int) b2.getCenterX() + getXOffset(),
+						(int) b2.getCenterY() + getYOffset()));
 
-				paintEdges(g, child);
+				paintEdges(child);
 			}
 		}
 	}

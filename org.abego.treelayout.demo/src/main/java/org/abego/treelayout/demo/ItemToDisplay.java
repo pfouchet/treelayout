@@ -8,7 +8,7 @@ import static javafx.scene.paint.Color.BLACK;
 
 public class ItemToDisplay implements IItemToDisplay {
 
-	private static final int RADIUS = 50;
+	private static final int RADIUS = 25;
 
 	private final Circle circle = new Circle(RADIUS);
 

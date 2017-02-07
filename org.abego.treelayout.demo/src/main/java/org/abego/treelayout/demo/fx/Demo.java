@@ -48,7 +48,7 @@ public class Demo extends Application {
 		// TODO replace by getter/setter so that it can be updated at runtime
 		// setup the tree layout configuration
 		double gapBetweenLevels = 150;
-		double gapBetweenCenterOfNodes = 150;
+		double gapBetweenCenterOfNodes = 50;
 		DefaultConfiguration<ItemToDisplay> configuration = new DefaultConfiguration<ItemToDisplay>(
 				gapBetweenLevels, gapBetweenCenterOfNodes, Configuration.Location.Left);
 
