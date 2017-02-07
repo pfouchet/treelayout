@@ -27,10 +27,47 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE 
  * POSSIBILITY OF SUCH DAMAGE.
  */
+package org.abego.treelayout.demo.fx;
 
-/**
- * Classes used by various "Demo" applications for the {@link org.abego.treelayout.TreeLayout}.
- *
- */
-package org.abego.treelayout.demo;
+import javafx.application.Application;
+import javafx.scene.Scene;
+import javafx.stage.Stage;
+import org.abego.treelayout.Configuration;
+import org.abego.treelayout.TreeForTreeLayout;
+import org.abego.treelayout.TreeLayout;
+import org.abego.treelayout.demo.ItemToDisplay;
+import org.abego.treelayout.demo.SampleTreeFactory;
+import org.abego.treelayout.demo.TextInBoxNodeExtentProvider;
+import org.abego.treelayout.util.DefaultConfiguration;
 
+public class Demo extends Application {
+
+	public void start(Stage primaryStage) throws Exception {
+		TreeForTreeLayout<ItemToDisplay> tree = SampleTreeFactory.createSampleTree2();
+
+		// TODO replace by getter/setter so that it can be updated at runtime
+		// setup the tree layout configuration
+		double gapBetweenLevels = 150;
+		double gapBetweenNodes = 50;
+		DefaultConfiguration<ItemToDisplay> configuration = new DefaultConfiguration<ItemToDisplay>(
+				gapBetweenLevels, gapBetweenNodes, Configuration.Location.Left);
+
+		// create the NodeExtentProvider for ItemToDisplay nodes
+		TextInBoxNodeExtentProvider nodeExtentProvider = new TextInBoxNodeExtentProvider();
+
+		// create the layout
+		TreeLayout<ItemToDisplay> treeLayout = new TreeLayout<ItemToDisplay>(tree,
+				nodeExtentProvider, configuration);
+
+		// Create a panel that draws the nodes and edges and show the panel
+		MainTreePane panel = new MainTreePane(treeLayout);
+
+		primaryStage.setMinHeight(800);
+		primaryStage.setMinWidth(800);
+
+		primaryStage.setScene(new Scene(panel));
+
+		primaryStage.centerOnScreen();
+		primaryStage.show();
+	}
+}

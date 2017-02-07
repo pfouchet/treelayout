@@ -27,22 +27,20 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE 
  * POSSIBILITY OF SUCH DAMAGE.
  */
-package org.abego.treelayout.demo.swing;
+package org.abego.treelayout.demo.fx;
 
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.layout.Pane;
-import javafx.scene.shape.Circle;
 import org.abego.treelayout.TreeForTreeLayout;
 import org.abego.treelayout.TreeLayout;
 import org.abego.treelayout.demo.ItemToDisplay;
 
 public class MainTreePane extends Pane {
-
-	public static final int RADIUS = 25;
 	private static final int Y_OFFSET = 20;
 	public final Canvas canvas;
 	private final TreeLayout<ItemToDisplay> treeLayout;
+
 
 	/**
 	 * Specifies the tree to be displayed by passing in a {@link TreeLayout} for
@@ -56,6 +54,9 @@ public class MainTreePane extends Pane {
 		canvas = new Canvas(treeLayout.getBounds().getWidth(), treeLayout.getBounds().getHeight());
 		GraphicsContext gd = canvas.getGraphicsContext2D();
 		getChildren().add(canvas);
+		gd.setLineWidth(2);
+		gd.setFill(javafx.scene.paint.Color.GREEN);
+		gd.setStroke(javafx.scene.paint.Color.BLUE);
 		paintEdges(gd, getTree().getRoot());
 
 		// paint the boxes
@@ -77,30 +78,35 @@ public class MainTreePane extends Pane {
 	}
 
 	private void paintEdges(GraphicsContext g, ItemToDisplay parent) {
-		g.setLineWidth(2);
-		g.setFill(javafx.scene.paint.Color.GREEN);
-		g.setStroke(javafx.scene.paint.Color.BLUE);
+
 		if (!getTree().isLeaf(parent)) {
 			TreeLayout.Rectangle2DCustom b1 = getBoundsOfNode(parent);
 			double x1 = b1.getCenterX();
 			double y1 = b1.getCenterY();
 			for (ItemToDisplay child : getChildren(parent)) {
 				TreeLayout.Rectangle2DCustom b2 = getBoundsOfNode(child);
-				g.strokeLine((int) x1, (int) y1 + Y_OFFSET, (int) b2.getCenterX(),
-						(int) b2.getCenterY() + Y_OFFSET);
+				g.strokeLine((int) x1 + getXOffset(), (int) y1 + getYOffset(), (int) b2.getCenterX() + getXOffset(),
+						(int) b2.getCenterY() + getYOffset());
 
 				paintEdges(g, child);
 			}
 		}
 	}
 
-	private void paintBox(ItemToDisplay itemToDisplay) {
+	private int getYOffset() {
+		return Y_OFFSET;
+	}
 
-		Circle circle = new Circle(RADIUS);
+	private int getXOffset() {
+		return 20;
+	}
+
+	private void paintBox(ItemToDisplay itemToDisplay) {
 		TreeLayout.Rectangle2DCustom box = getBoundsOfNode(itemToDisplay);
-		circle.setCenterX(box.getCenterX());
-		circle.setCenterY(box.getCenterY() + Y_OFFSET);
-		getChildren().add(circle);
-		circle.toFront();
+		getChildren().add(itemToDisplay.getItem());
+
+		itemToDisplay.getItem().setLayoutX(box.getCenterX() + getXOffset());
+		itemToDisplay.getItem().setLayoutY(box.getCenterY() + getYOffset());
+
 	}
 }

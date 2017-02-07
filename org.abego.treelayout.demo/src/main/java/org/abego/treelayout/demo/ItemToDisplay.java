@@ -1,19 +1,31 @@
 package org.abego.treelayout.demo;
 
+import javafx.scene.paint.Color;
+import javafx.scene.shape.Circle;
+import javafx.scene.shape.Shape;
+
+import static javafx.scene.paint.Color.BLACK;
+
 public class ItemToDisplay<T> implements IItemToDisplay {
 
-	public final T text;
+	public static final int RADIUS = 25;
+
+	public final Color text;
 	public final int height;
 	public final int width;
 
-	public ItemToDisplay(T text, int width, int height) {
-		this.text = text;
+	private final Circle circle = new Circle(RADIUS);
+
+	public ItemToDisplay(Color color, int width, int height) {
+		this.text = color;
 		this.width = width;
 		this.height = height;
+		circle.setFill(color);
+		circle.setStroke(BLACK);
 	}
 
-	public T getItem() {
-		return text;
+	public Shape getItem() {
+		return circle;
 	}
 
 	public double getWidth() {

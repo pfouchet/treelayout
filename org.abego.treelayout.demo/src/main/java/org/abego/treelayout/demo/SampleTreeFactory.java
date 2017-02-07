@@ -29,6 +29,7 @@
  */
 package org.abego.treelayout.demo;
 
+import javafx.scene.paint.Color;
 import org.abego.treelayout.TreeForTreeLayout;
 import org.abego.treelayout.util.DefaultTreeForTreeLayout;
 
@@ -43,35 +44,25 @@ public class SampleTreeFactory {
 	 * @return a "Sample" tree with {@link ItemToDisplay} items as nodes.
 	 */
 	public static TreeForTreeLayout<ItemToDisplay> createSampleTree2() {
-		ItemToDisplay root = new ItemToDisplay<String>("prog", 40, 20);
-		ItemToDisplay n1 = new ItemToDisplay<String>("classDef", 65, 20);
-		ItemToDisplay n1_1 = new ItemToDisplay<String>("class", 50, 20);
-		ItemToDisplay n1_2 = new ItemToDisplay<String>("T", 20, 20);
-		ItemToDisplay n1_3 = new ItemToDisplay<String>("{", 20, 20);
-		ItemToDisplay n1_4 = new ItemToDisplay<String>("member", 60, 20);
-		ItemToDisplay n1_5 = new ItemToDisplay<String>("member", 60, 20);
-		ItemToDisplay n1_5_1 = new ItemToDisplay<String>("<ERROR:int>", 90, 20);
-		ItemToDisplay n1_6 = new ItemToDisplay<String>("member", 60, 20);
-		ItemToDisplay n1_6_1 = new ItemToDisplay<String>("int", 30, 20);
-		ItemToDisplay n1_6_2 = new ItemToDisplay<String>("i", 20, 20);
-		ItemToDisplay n1_6_3 = new ItemToDisplay<String>(";", 20, 20);
-		ItemToDisplay n1_7 = new ItemToDisplay<String>("}", 20, 20);
+		ItemToDisplay root = new ItemToDisplay<String>(Color.BLACK, 40, 20);
+		ItemToDisplay n1 = new ItemToDisplay<String>(Color.BLUE, 65, 20);
+		ItemToDisplay n1_3 = new ItemToDisplay<String>(Color.GREEN, 20, 20);
+		ItemToDisplay n1_4 = new ItemToDisplay<String>(Color.YELLOW, 60, 20);
+		ItemToDisplay n1_5 = new ItemToDisplay<String>(Color.RED, 60, 20);
+		ItemToDisplay n1_5_1 = new ItemToDisplay<String>(Color.GREY, 90, 20);
+		ItemToDisplay n1_6 = new ItemToDisplay<String>(Color.GREENYELLOW, 60, 20);
+		ItemToDisplay n1_6_1 = new ItemToDisplay<String>(Color.PINK, 30, 20);
 
 
 		DefaultTreeForTreeLayout<ItemToDisplay> tree = new DefaultTreeForTreeLayout<ItemToDisplay>(
 				root);
 		tree.addChild(root, n1);
-		tree.addChild(n1, n1_1);
-		tree.addChild(n1, n1_2);
 		tree.addChild(n1, n1_3);
 		tree.addChild(n1, n1_4);
 		tree.addChild(n1, n1_5);
 		tree.addChild(n1_5, n1_5_1);
 		tree.addChild(n1, n1_6);
 		tree.addChild(n1_6, n1_6_1);
-		tree.addChild(n1_6, n1_6_2);
-		tree.addChild(n1_6, n1_6_3);
-		tree.addChild(n1, n1_7);
 		return tree;
 	}
 }
