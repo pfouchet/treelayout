@@ -30,7 +30,9 @@
 
 package org.abego.treelayout;
 
-import static org.abego.treelayout.internal.util.Contract.checkArg;
+import org.abego.treelayout.Configuration.AlignmentInLevel;
+import org.abego.treelayout.Configuration.Location;
+import org.abego.treelayout.internal.util.java.lang.string.StringUtil;
 
 import java.awt.geom.Rectangle2D;
 import java.io.PrintStream;
@@ -41,9 +43,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
-import org.abego.treelayout.Configuration.AlignmentInLevel;
-import org.abego.treelayout.Configuration.Location;
-import org.abego.treelayout.internal.util.java.lang.string.StringUtil;
+import static org.abego.treelayout.internal.util.Contract.checkArg;
 
 /**
  * Implements the actual tree layout algorithm.
@@ -53,11 +53,9 @@ import org.abego.treelayout.internal.util.java.lang.string.StringUtil;
  * </p>
  * See <a href="package-summary.html">this summary</a> to get an overview how to
  * use TreeLayout.
- * 
- * 
- * @author Udo Borkowski (ub@abego.org)
- * 
+ *
  * @param <TreeNode> Type of elements used as nodes in the tree
+ * @author Udo Borkowski (ub@abego.org)
  */
 public class TreeLayout<TreeNode> {
 	/*
@@ -86,24 +84,106 @@ public class TreeLayout<TreeNode> {
 	// tree
 
 	private final TreeForTreeLayout<TreeNode> tree;
+	private final NodeExtentProvider<TreeNode> nodeExtentProvider;
+	private final Configuration<TreeNode> configuration;
+
+	// ------------------------------------------------------------------------
+	// nodeExtentProvider
+	private final List<Double> sizeOfLevel = new ArrayList<Double>();
+	private final boolean useIdentity;
+	private final Map<TreeNode, Double> mod;
+	private final Map<TreeNode, TreeNode> thread;
+	private final Map<TreeNode, Double> prelim;
+	private final Map<TreeNode, Double> change;
+	private final Map<TreeNode, Double> shift;
+
+	// ------------------------------------------------------------------------
+	// configuration
+	private final Map<TreeNode, TreeNode> ancestor;
+	private final Map<TreeNode, Integer> number;
+	private final Map<TreeNode, NormalizedPosition> positions;
+	private double boundsLeft = Double.MAX_VALUE;
+
+	// ------------------------------------------------------------------------
+	// bounds
+	private double boundsRight = Double.MIN_VALUE;
+	private double boundsTop = Double.MAX_VALUE;
+	private double boundsBottom = Double.MIN_VALUE;
+	private Map<TreeNode, Rectangle2DCustom> nodeBounds;
+
+	/**
+	 * Creates a TreeLayout for a given tree.
+	 * <p>
+	 * In addition to the tree the {@link NodeExtentProvider} and the
+	 * {@link Configuration} must be given.
+	 *
+	 * @param tree               &nbsp;
+	 * @param nodeExtentProvider &nbsp;
+	 * @param configuration      &nbsp;
+	 * @param useIdentity        [default: false] when true, identity ("==") is used instead of
+	 *                           equality ("equals(...)") when checking nodes. Within a tree
+	 *                           each node must only exist once (using this check).
+	 */
+	public TreeLayout(TreeForTreeLayout<TreeNode> tree,
+					  NodeExtentProvider<TreeNode> nodeExtentProvider,
+					  Configuration<TreeNode> configuration, boolean useIdentity) {
+		this.tree = tree;
+		this.nodeExtentProvider = nodeExtentProvider;
+		this.configuration = configuration;
+		this.useIdentity = useIdentity;
+
+		if (this.useIdentity) {
+			this.mod = new IdentityHashMap<TreeNode, Double>();
+			this.thread = new IdentityHashMap<TreeNode, TreeNode>();
+			this.prelim = new IdentityHashMap<TreeNode, Double>();
+			this.change = new IdentityHashMap<TreeNode, Double>();
+			this.shift = new IdentityHashMap<TreeNode, Double>();
+			this.ancestor = new IdentityHashMap<TreeNode, TreeNode>();
+			this.number = new IdentityHashMap<TreeNode, Integer>();
+			this.positions = new IdentityHashMap<TreeNode, NormalizedPosition>();
+		} else {
+			this.mod = new HashMap<TreeNode, Double>();
+			this.thread = new HashMap<TreeNode, TreeNode>();
+			this.prelim = new HashMap<TreeNode, Double>();
+			this.change = new HashMap<TreeNode, Double>();
+			this.shift = new HashMap<TreeNode, Double>();
+			this.ancestor = new HashMap<TreeNode, TreeNode>();
+			this.number = new HashMap<TreeNode, Integer>();
+			this.positions = new HashMap<TreeNode, NormalizedPosition>();
+		}
+
+		// No need to explicitly set mod, thread and ancestor as their getters
+		// are taking care of the initial values. This avoids a full tree walk
+		// through and saves some memory as no entries are added for
+		// "initial values".
+
+		TreeNode r = tree.getRoot();
+		firstWalk(r, null);
+		calcSizeOfLevels(r, 0);
+		secondWalk(r, -getPrelim(r), 0, 0);
+	}
+
+	public TreeLayout(TreeForTreeLayout<TreeNode> tree,
+					  NodeExtentProvider<TreeNode> nodeExtentProvider,
+					  Configuration<TreeNode> configuration) {
+		this(tree, nodeExtentProvider, configuration, false);
+	}
+
+	// ------------------------------------------------------------------------
+	// size of level
 
 	/**
 	 * Returns the Tree the layout is created for.
-	 * 
+	 *
 	 * @return the Tree the layout is created for
 	 */
 	public TreeForTreeLayout<TreeNode> getTree() {
 		return tree;
 	}
 
-	// ------------------------------------------------------------------------
-	// nodeExtentProvider
-
-	private final NodeExtentProvider<TreeNode> nodeExtentProvider;
-
 	/**
 	 * Returns the {@link NodeExtentProvider} used by this {@link TreeLayout}.
-	 * 
+	 *
 	 * @return the {@link NodeExtentProvider} used by this {@link TreeLayout}
 	 */
 	public NodeExtentProvider<TreeNode> getNodeExtentProvider() {
@@ -118,9 +198,15 @@ public class TreeLayout<TreeNode> {
 		return nodeExtentProvider.getWidth(node);
 	}
 
+	// ------------------------------------------------------------------------
+	// NormalizedPosition
+
 	private double getWidthOrHeightOfNode(TreeNode treeNode, boolean returnWidth) {
 		return returnWidth ? getNodeWidth(treeNode) : getNodeHeight(treeNode);
 	}
+
+	// ------------------------------------------------------------------------
+	// The Algorithm
 
 	/**
 	 * When the level changes in Y-axis (i.e. root location Top or Bottom) the
@@ -129,7 +215,7 @@ public class TreeLayout<TreeNode> {
 	 * <p>
 	 * The thickness of a node is used when calculating the locations of the
 	 * levels.
-	 * 
+	 *
 	 * @param treeNode
 	 * @return
 	 */
@@ -143,7 +229,7 @@ public class TreeLayout<TreeNode> {
 	 * <p>
 	 * The size of a node is used when calculating the distance between two
 	 * nodes.
-	 * 
+	 *
 	 * @param treeNode
 	 * @return
 	 */
@@ -151,14 +237,9 @@ public class TreeLayout<TreeNode> {
 		return getWidthOrHeightOfNode(treeNode, isLevelChangeInYAxis());
 	}
 
-	// ------------------------------------------------------------------------
-	// configuration
-
-	private final Configuration<TreeNode> configuration;
-
 	/**
 	 * Returns the Configuration used by this {@link TreeLayout}.
-	 * 
+	 *
 	 * @return the Configuration used by this {@link TreeLayout}
 	 */
 	public Configuration<TreeNode> getConfiguration() {
@@ -175,14 +256,6 @@ public class TreeLayout<TreeNode> {
 		return rootLocation == Location.Bottom
 				|| rootLocation == Location.Right ? -1 : 1;
 	}
-
-	// ------------------------------------------------------------------------
-	// bounds
-
-	private double boundsLeft = Double.MAX_VALUE;
-	private double boundsRight = Double.MIN_VALUE;
-	private double boundsTop = Double.MAX_VALUE;
-	private double boundsBottom = Double.MIN_VALUE;
 
 	private void updateBounds(TreeNode node, double centerX, double centerY) {
 		double width = getNodeWidth(node);
@@ -210,18 +283,13 @@ public class TreeLayout<TreeNode> {
 	 * <p>
 	 * The bounds of a TreeLayout is the smallest rectangle containing the
 	 * bounds of all nodes in the layout. It always starts at (0,0).
-	 * 
+	 *
 	 * @return the bounds of the tree layout
 	 */
-	public Rectangle2D getBounds() {
-		return new Rectangle2D.Double(0, 0, boundsRight - boundsLeft,
+	public Rectangle2DCustom getBounds() {
+		return new Rectangle2DCustom(0, 0, boundsRight - boundsLeft,
 				boundsBottom - boundsTop);
 	}
-
-	// ------------------------------------------------------------------------
-	// size of level
-
-	private final List<Double> sizeOfLevel = new ArrayList<Double>();
 
 	private void calcSizeOfLevels(TreeNode node, int level) {
 		double oldSize;
@@ -247,7 +315,7 @@ public class TreeLayout<TreeNode> {
 
 	/**
 	 * Returns the number of levels of the tree.
-	 * 
+	 *
 	 * @return [level &gt; 0]
 	 */
 	public int getLevelCount() {
@@ -261,7 +329,7 @@ public class TreeLayout<TreeNode> {
 	 * maximal height of the nodes of that level. When the root is located at
 	 * the left or right the size of a level is the maximal width of the nodes
 	 * of that level.
-	 * 
+	 *
 	 * @param level &nbsp;
 	 * @return the size of the level [level &gt;= 0 &amp;&amp; level &lt; levelCount]
 	 */
@@ -271,57 +339,6 @@ public class TreeLayout<TreeNode> {
 
 		return sizeOfLevel.get(level);
 	}
-
-	// ------------------------------------------------------------------------
-	// NormalizedPosition
-
-	/**
-	 * The algorithm calculates the position starting with the root at 0. I.e.
-	 * the left children will get negative positions. However we want the result
-	 * to be normalized to (0,0).
-	 * <p>
-	 * {@link NormalizedPosition} will normalize the position (given relative to
-	 * the root position), taking the current bounds into account. This way the
-	 * left most node bounds will start at x = 0, the top most node bounds at y
-	 * = 0.
-	 */
-	private class NormalizedPosition {
-		private double x_relativeToRoot;
-		private double y_relativeToRoot;
-
-		public NormalizedPosition(double x_relativeToRoot,
-				double y_relativeToRoot) {
-			setLocation(x_relativeToRoot, y_relativeToRoot);
-		}
-
-		public double getX() {
-			return x_relativeToRoot - boundsLeft;
-		}
-
-		public double getY() {
-			return y_relativeToRoot - boundsTop;
-		}
-
-		// never called from outside
-		public void setLocation(double x_relativeToRoot, double y_relativeToRoot) {
-			this.x_relativeToRoot = x_relativeToRoot;
-			this.y_relativeToRoot = y_relativeToRoot;
-		}
-	}
-
-	// ------------------------------------------------------------------------
-	// The Algorithm
-	
-	private final boolean useIdentity;
-
-	private final Map<TreeNode, Double> mod;
-	private final Map<TreeNode, TreeNode> thread;
-	private final Map<TreeNode, Double> prelim;
-	private final Map<TreeNode, Double> change;
-	private final Map<TreeNode, Double> shift;
-	private final Map<TreeNode, TreeNode> ancestor;
-	private final Map<TreeNode, Integer> number;
-	private final Map<TreeNode, NormalizedPosition> positions;
 
 	private double getMod(TreeNode node) {
 		Double d = mod.get(node);
@@ -382,7 +399,7 @@ public class TreeLayout<TreeNode> {
 	 * <p>
 	 * I.e. the distance includes the gap between the nodes and half of the
 	 * sizes of the nodes.
-	 * 
+	 *
 	 * @param v
 	 * @param w
 	 * @return the distance between node v and w
@@ -404,11 +421,8 @@ public class TreeLayout<TreeNode> {
 	}
 
 	/**
-	 * 
-	 * @param node
-	 *            [tree.isChildOfParent(node, parentNode)]
-	 * @param parentNode
-	 *            parent of node
+	 * @param node       [tree.isChildOfParent(node, parentNode)]
+	 * @param parentNode parent of node
 	 * @return
 	 */
 	private int getNumber(TreeNode node, TreeNode parentNode) {
@@ -425,16 +439,15 @@ public class TreeLayout<TreeNode> {
 	}
 
 	/**
-	 * 
 	 * @param vIMinus
 	 * @param v
 	 * @param parentOfV
 	 * @param defaultAncestor
 	 * @return the greatest distinct ancestor of vIMinus and its right neighbor
-	 *         v
+	 * v
 	 */
 	private TreeNode ancestor(TreeNode vIMinus, TreeNode v, TreeNode parentOfV,
-			TreeNode defaultAncestor) {
+							  TreeNode defaultAncestor) {
 		TreeNode ancestor = getAncestor(vIMinus);
 
 		// when the ancestor of vIMinus is a sibling of v (i.e. has the same
@@ -446,7 +459,7 @@ public class TreeLayout<TreeNode> {
 	}
 
 	private void moveSubtree(TreeNode wMinus, TreeNode wPlus, TreeNode parent,
-			double shift) {
+							 double shift) {
 
 		int subtrees = getNumber(wPlus, parent) - getNumber(wMinus, parent);
 		setChange(wPlus, getChange(wPlus) - shift / subtrees);
@@ -487,17 +500,15 @@ public class TreeLayout<TreeNode> {
 	 * {@link TreeForTreeLayout} to include extra methods "getParent",
 	 * "getLeftSibling", or "getLeftMostSibling". This keeps the interface
 	 * {@link TreeForTreeLayout} small and avoids redundant implementations.
-	 * 
+	 *
 	 * @param v
 	 * @param defaultAncestor
-	 * @param leftSibling
-	 *            [nullable] the left sibling v, if there is any
-	 * @param parentOfV
-	 *            the parent of v
+	 * @param leftSibling     [nullable] the left sibling v, if there is any
+	 * @param parentOfV       the parent of v
 	 * @return the (possibly changes) defaultAncestor
 	 */
 	private TreeNode apportion(TreeNode v, TreeNode defaultAncestor,
-			TreeNode leftSibling, TreeNode parentOfV) {
+							   TreeNode leftSibling, TreeNode parentOfV) {
 		TreeNode w = leftSibling;
 		if (w == null) {
 			// v has no left sibling
@@ -563,9 +574,7 @@ public class TreeLayout<TreeNode> {
 	}
 
 	/**
-	 * 
-	 * @param v
-	 *            [!tree.isLeaf(v)]
+	 * @param v [!tree.isLeaf(v)]
 	 */
 	private void executeShifts(TreeNode v) {
 		double shift = 0;
@@ -582,10 +591,9 @@ public class TreeLayout<TreeNode> {
 	 * In difference to the original algorithm we also pass in the leftSibling
 	 * (see {@link #apportion(Object, Object, Object, Object)} for a
 	 * motivation).
-	 * 
+	 *
 	 * @param v
-	 * @param leftSibling
-	 *            [nullable] the left sibling v, if there is any
+	 * @param leftSibling [nullable] the left sibling v, if there is any
 	 */
 	private void firstWalk(TreeNode v, TreeNode leftSibling) {
 		if (tree.isLeaf(v)) {
@@ -627,10 +635,13 @@ public class TreeLayout<TreeNode> {
 		}
 	}
 
+	// ------------------------------------------------------------------------
+	// nodeBounds
+
 	/**
 	 * In difference to the original algorithm we also pass in extra level
 	 * information.
-	 * 
+	 *
 	 * @param v
 	 * @param m
 	 * @param level
@@ -680,24 +691,19 @@ public class TreeLayout<TreeNode> {
 		}
 	}
 
-	// ------------------------------------------------------------------------
-	// nodeBounds
-
-	private Map<TreeNode, Rectangle2D.Double> nodeBounds;
-
 	/**
 	 * Returns the layout of the tree nodes by mapping each node of the tree to
 	 * its bounds (position and size).
 	 * <p>
 	 * For each rectangle x and y will be &gt;= 0. At least one rectangle will have
 	 * an x == 0 and at least one rectangle will have an y == 0.
-	 * 
+	 *
 	 * @return maps each node of the tree to its bounds (position and size).
 	 */
-	public Map<TreeNode, Rectangle2D.Double> getNodeBounds() {
+	public Map<TreeNode, Rectangle2DCustom> getNodeBounds() {
 		if (nodeBounds == null) {
-			nodeBounds = this.useIdentity ? new IdentityHashMap<TreeNode, Rectangle2D.Double>()
-					: new HashMap<TreeNode, Rectangle2D.Double>();
+			nodeBounds = this.useIdentity ? new IdentityHashMap<TreeNode, Rectangle2DCustom>()
+					: new HashMap<TreeNode, Rectangle2DCustom>();
 			for (Entry<TreeNode, NormalizedPosition> entry : positions.entrySet()) {
 				TreeNode node = entry.getKey();
 				NormalizedPosition pos = entry.getValue();
@@ -705,7 +711,7 @@ public class TreeLayout<TreeNode> {
 				double h = getNodeHeight(node);
 				double x = pos.getX() - w / 2;
 				double y = pos.getY() - h / 2;
-				nodeBounds.put(node, new Rectangle2D.Double(x, y, w, h));
+				nodeBounds.put(node, new Rectangle2DCustom(x, y, w, h));
 			}
 		}
 		return nodeBounds;
@@ -714,75 +720,13 @@ public class TreeLayout<TreeNode> {
 	// ------------------------------------------------------------------------
 	// constructor
 
-	/**
-	 * Creates a TreeLayout for a given tree.
-	 * <p>
-	 * In addition to the tree the {@link NodeExtentProvider} and the
-	 * {@link Configuration} must be given.
-	 * 
-     * @param tree &nbsp;
-     * @param nodeExtentProvider &nbsp;
-     * @param configuration &nbsp;
-     * @param useIdentity
-	 *            [default: false] when true, identity ("==") is used instead of
-	 *            equality ("equals(...)") when checking nodes. Within a tree
-	 *            each node must only exist once (using this check).
-	 */
-	public TreeLayout(TreeForTreeLayout<TreeNode> tree,
-			NodeExtentProvider<TreeNode> nodeExtentProvider,
-			Configuration<TreeNode> configuration, boolean useIdentity) {
-		this.tree = tree;
-		this.nodeExtentProvider = nodeExtentProvider;
-		this.configuration = configuration;
-		this.useIdentity = useIdentity;
-
-		if (this.useIdentity) {
-			this.mod = new IdentityHashMap<TreeNode, Double>();
-			this.thread = new IdentityHashMap<TreeNode, TreeNode>();
-			this.prelim = new IdentityHashMap<TreeNode, Double>();
-			this.change = new IdentityHashMap<TreeNode, Double>();
-			this.shift = new IdentityHashMap<TreeNode, Double>();
-			this.ancestor = new IdentityHashMap<TreeNode, TreeNode>();
-			this.number = new IdentityHashMap<TreeNode, Integer>();
-			this.positions = new IdentityHashMap<TreeNode, NormalizedPosition>();
-		} else {
-			this.mod = new HashMap<TreeNode, Double>();
-			this.thread = new HashMap<TreeNode, TreeNode>();
-			this.prelim = new HashMap<TreeNode, Double>();
-			this.change = new HashMap<TreeNode, Double>();
-			this.shift = new HashMap<TreeNode, Double>();
-			this.ancestor = new HashMap<TreeNode, TreeNode>();
-			this.number = new HashMap<TreeNode, Integer>();
-			this.positions = new HashMap<TreeNode, NormalizedPosition>();
-		}
-		
-		// No need to explicitly set mod, thread and ancestor as their getters
-		// are taking care of the initial values. This avoids a full tree walk
-		// through and saves some memory as no entries are added for
-		// "initial values".
-
-		TreeNode r = tree.getRoot();
-		firstWalk(r, null);
-		calcSizeOfLevels(r, 0);
-		secondWalk(r, -getPrelim(r), 0, 0);
-	}
-	
-	public TreeLayout(TreeForTreeLayout<TreeNode> tree,
-			NodeExtentProvider<TreeNode> nodeExtentProvider,
-			Configuration<TreeNode> configuration) {
-		this(tree, nodeExtentProvider, configuration, false);
-	}
-	
-	// ------------------------------------------------------------------------
-	// checkTree
-
-	private void addUniqueNodes(Map<TreeNode,TreeNode> nodes, TreeNode newNode) {
-		if (nodes.put(newNode,newNode) != null) {
+	private void addUniqueNodes(Map<TreeNode, TreeNode> nodes, TreeNode newNode) {
+		if (nodes.put(newNode, newNode) != null) {
 			throw new RuntimeException(String.format(
 					"Node used more than once in tree: %s", newNode));
 		}
 		for (TreeNode n : tree.getChildren(newNode)) {
-			addUniqueNodes(nodes,n);
+			addUniqueNodes(nodes, n);
 		}
 	}
 
@@ -799,17 +743,17 @@ public class TreeLayout<TreeNode> {
 	 */
 	public void checkTree() {
 		Map<TreeNode, TreeNode> nodes = this.useIdentity ? new IdentityHashMap<TreeNode, TreeNode>()
-				:new HashMap<TreeNode,TreeNode>();
-		
+				: new HashMap<TreeNode, TreeNode>();
+
 		// Traverse the tree and check if each node is only used once.
-		addUniqueNodes(nodes,tree.getRoot());
+		addUniqueNodes(nodes, tree.getRoot());
 	}
 
 	// ------------------------------------------------------------------------
-	// dumpTree
+	// checkTree
 
 	private void dumpTree(PrintStream output, TreeNode node, int indent,
-			DumpConfiguration dumpConfiguration) {
+						  DumpConfiguration dumpConfiguration) {
 		StringBuilder sb = new StringBuilder();
 		for (int i = 0; i < indent; i++) {
 			sb.append(dumpConfiguration.indent);
@@ -825,9 +769,9 @@ public class TreeLayout<TreeNode> {
 			}
 			sb.append("]");
 		}
-		
+
 		sb.append(StringUtil.quote(node != null ? node.toString() : null));
-		
+
 		if (dumpConfiguration.includeNodeSize) {
 			sb.append(" (size: ");
 			sb.append(getNodeWidth(node));
@@ -835,12 +779,91 @@ public class TreeLayout<TreeNode> {
 			sb.append(getNodeHeight(node));
 			sb.append(")");
 		}
-		
+
 		output.println(sb.toString());
-		
+
 		for (TreeNode n : tree.getChildren(node)) {
 			dumpTree(output, n, indent + 1, dumpConfiguration);
 		}
+	}
+
+	/**
+	 * Prints a dump of the tree to the given printStream, using the node's
+	 * "toString" method.
+	 *
+	 * @param printStream       &nbsp;
+	 * @param dumpConfiguration [default: new DumpConfiguration()]
+	 */
+	public void dumpTree(PrintStream printStream, DumpConfiguration dumpConfiguration) {
+		dumpTree(printStream, tree.getRoot(), 0, dumpConfiguration);
+	}
+
+	// ------------------------------------------------------------------------
+	// dumpTree
+
+	public void dumpTree(PrintStream printStream) {
+		dumpTree(printStream, new DumpConfiguration());
+	}
+
+	public static class Rectangle2DCustom extends Rectangle2D.Double{
+		public Rectangle2DCustom() {
+		}
+
+		public Rectangle2DCustom(double x, double y, double w, double h) {
+			super(x, y, w, h);
+		}
+
+		//		private double x;
+//		private double y;
+//		private double width;
+//		private double height;
+//
+//		public Rectangle2DCustom(double x, double y, double w, double h) {
+//			this.x = x;
+//			this.y = y;
+//			this.width = w;
+//			this.height = h;
+//		}
+//
+//		public double getX() {
+//			return x;
+//		}
+//
+//		public double getY() {
+//			return y;
+//		}
+//
+//		public double getWidth() {
+//			return width;
+//		}
+//
+//		public double getHeight() {
+//			return height;
+//		}
+//
+//		public double getCenterX() {
+//			return (x + width) / 2.0;
+//		}
+//
+//		public double getCenterY() {
+//			return (y + height) / 2.0;
+//		}
+//
+//		public Rectangle getBounds() {
+//			double width = getWidth();
+//			double height = getHeight();
+//			if (width < 0 || height < 0) {
+//				return new Rectangle();
+//			}
+//			double x = getX();
+//			double y = getY();
+//			double x1 = Math.floor(x);
+//			double y1 = Math.floor(y);
+//			double x2 = Math.ceil(x + width);
+//			double y2 = Math.ceil(y + height);
+//			return new Rectangle((int) x1, (int) y1,
+//					(int) (x2 - x1), (int) (y2 - y1));
+//		}
 	}
 
 	public static class DumpConfiguration {
@@ -863,36 +886,53 @@ public class TreeLayout<TreeNode> {
 		public final boolean includeObjectToString;
 
 		/**
-		 * 
-		 * @param indent [default: "    "]
+		 * @param indent          [default: "    "]
 		 * @param includeNodeSize [default: false]
-		 * @param includePointer [default: false]
+		 * @param includePointer  [default: false]
 		 */
 		public DumpConfiguration(String indent, boolean includeNodeSize,
-				boolean includePointer) {
+								 boolean includePointer) {
 			this.indent = indent;
 			this.includeNodeSize = includeNodeSize;
 			this.includeObjectToString = includePointer;
 		}
-		
+
 		public DumpConfiguration() {
-			this("    ",false,false);
+			this("    ", false, false);
 		}
 	}
-	
-	/**
-	 * Prints a dump of the tree to the given printStream, using the node's
-	 * "toString" method.
-	 * 
-	 * @param printStream &nbsp;
-	 * @param dumpConfiguration
-	 *            [default: new DumpConfiguration()]
-	 */
-	public void dumpTree(PrintStream printStream, DumpConfiguration dumpConfiguration) {
-		dumpTree(printStream,tree.getRoot(),0, dumpConfiguration);
-	}
 
-	public void dumpTree(PrintStream printStream) {
-		dumpTree(printStream,new DumpConfiguration());
+	/**
+	 * The algorithm calculates the position starting with the root at 0. I.e.
+	 * the left children will get negative positions. However we want the result
+	 * to be normalized to (0,0).
+	 * <p>
+	 * {@link NormalizedPosition} will normalize the position (given relative to
+	 * the root position), taking the current bounds into account. This way the
+	 * left most node bounds will start at x = 0, the top most node bounds at y
+	 * = 0.
+	 */
+	private class NormalizedPosition {
+		private double x_relativeToRoot;
+		private double y_relativeToRoot;
+
+		public NormalizedPosition(double x_relativeToRoot,
+								  double y_relativeToRoot) {
+			setLocation(x_relativeToRoot, y_relativeToRoot);
+		}
+
+		public double getX() {
+			return x_relativeToRoot - boundsLeft;
+		}
+
+		public double getY() {
+			return y_relativeToRoot - boundsTop;
+		}
+
+		// never called from outside
+		public void setLocation(double x_relativeToRoot, double y_relativeToRoot) {
+			this.x_relativeToRoot = x_relativeToRoot;
+			this.y_relativeToRoot = y_relativeToRoot;
+		}
 	}
 }

@@ -38,7 +38,6 @@ import org.abego.treelayout.TreeLayout;
 import org.abego.treelayout.demo.TextInBox;
 
 import java.awt.*;
-import java.awt.geom.Rectangle2D;
 
 /**
  * A JComponent displaying a tree of TextInBoxes, given by a {@link TreeLayout}.
@@ -86,7 +85,7 @@ public class TextInBoxTreePane extends Pane {
 		return getTree().getChildren(parent);
 	}
 
-	private Rectangle2D.Double getBoundsOfNode(TextInBox node) {
+	private TreeLayout.Rectangle2DCustom getBoundsOfNode(TextInBox node) {
 		return treeLayout.getNodeBounds().get(node);
 	}
 
@@ -95,11 +94,11 @@ public class TextInBoxTreePane extends Pane {
 		g.setFill(javafx.scene.paint.Color.GREEN);
 		g.setStroke(javafx.scene.paint.Color.BLUE);
 		if (!getTree().isLeaf(parent)) {
-			Rectangle2D.Double b1 = getBoundsOfNode(parent);
+			TreeLayout.Rectangle2DCustom b1 = getBoundsOfNode(parent);
 			double x1 = b1.getCenterX();
 			double y1 = b1.getCenterY();
 			for (TextInBox child : getChildren(parent)) {
-				Rectangle2D.Double b2 = getBoundsOfNode(child);
+				TreeLayout.Rectangle2DCustom b2 = getBoundsOfNode(child);
 				g.strokeLine((int) x1, (int) y1 + Y_OFFSET, (int) b2.getCenterX(),
 						(int) b2.getCenterY() + Y_OFFSET);
 
@@ -111,9 +110,9 @@ public class TextInBoxTreePane extends Pane {
 	private void paintBox(TextInBox textInBox) {
 
 		Circle circle = new Circle(RADIUS);
-		Rectangle2D.Double box = getBoundsOfNode(textInBox);
-		circle.setCenterX(box.x + box.width / 2);
-		circle.setCenterY(box.y + box.height / 2 + Y_OFFSET);
+		TreeLayout.Rectangle2DCustom box = getBoundsOfNode(textInBox);
+		circle.setCenterX(box.getX() + box.getWidth()/ 2);
+		circle.setCenterY(box.getY() + box.getHeight() / 2 + Y_OFFSET);
 		getChildren().add(circle);
 		circle.toFront();
 	}

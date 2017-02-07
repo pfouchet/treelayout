@@ -29,15 +29,6 @@
  */
 package org.abego.treelayout.netbeans;
 
-import java.awt.Point;
-import java.awt.Rectangle;
-import java.awt.geom.Rectangle2D;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
 import org.abego.treelayout.Configuration;
 import org.abego.treelayout.Configuration.AlignmentInLevel;
 import org.abego.treelayout.Configuration.Location;
@@ -48,6 +39,13 @@ import org.abego.treelayout.util.DefaultConfiguration;
 import org.netbeans.api.visual.graph.layout.GraphLayout;
 import org.netbeans.api.visual.graph.layout.UniversalGraph;
 import org.netbeans.api.visual.widget.Widget;
+
+import java.awt.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 /**
  * This GraphLayout implementation uses the <a
@@ -200,9 +198,9 @@ public class AbegoTreeLayoutForNetbeans<N, E> extends GraphLayout<N, E> {
 		TreeLayout<N> layout = new TreeLayout<N>(new MyTreeForTreeLayout(
 				rootNode, graph), new MyNodeExtentProvider(graph),
 				configuration);
-		Map<N, Rectangle2D.Double> bounds = layout.getNodeBounds();
-		for (Map.Entry<N, Rectangle2D.Double> entry : bounds.entrySet()) {
-			Rectangle2D.Double rect = entry.getValue();
+		Map<N, TreeLayout.Rectangle2DCustom> bounds = layout.getNodeBounds();
+		for (Map.Entry<N, TreeLayout.Rectangle2DCustom> entry : bounds.entrySet()) {
+			TreeLayout.Rectangle2DCustom rect = entry.getValue();
 			Point pt = new Point((int) Math.round(rect.getX() + originX),
 					(int) Math.round(rect.getY() + originY));
 			setResolvedNodeLocation(graph, entry.getKey(), pt);
