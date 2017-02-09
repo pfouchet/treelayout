@@ -40,13 +40,13 @@ import org.abego.treelayout.NodeExtentProvider;
  * @author Udo Borkowski (ub@abego.org)
  */
 public class TextInBoxNodeExtentProvider implements
-		NodeExtentProvider<ItemToDisplay> {
+		NodeExtentProvider<IItemToDisplay> {
 
-	public double getWidth(ItemToDisplay treeNode) {
+	public double getWidth(IItemToDisplay treeNode) {
 		return treeNode.getWidth();
 	}
 
-	public double getHeight(ItemToDisplay treeNode) {
+	public double getHeight(IItemToDisplay treeNode) {
 		return treeNode.getHeight();
 	}
 }

@@ -43,7 +43,7 @@ public class SampleTreeFactory {
 	/**
 	 * @return a "Sample" tree with {@link ItemToDisplay} items as nodes.
 	 */
-	public static TreeForTreeLayout<ItemToDisplay> createSampleTree2() {
+	public static TreeForTreeLayout<IItemToDisplay> createSampleTree2() {
 		ItemToDisplay root = new ItemToDisplay(Color.BLACK);
 		ItemToDisplay n1 = new ItemToDisplay(Color.BLUE);
 		ItemToDisplay n1_3 = new ItemToDisplay(Color.GREEN);
@@ -54,7 +54,7 @@ public class SampleTreeFactory {
 		ItemToDisplay n1_6_1 = new ItemToDisplay(Color.PINK);
 
 
-		DefaultTreeForTreeLayout<ItemToDisplay> tree = new DefaultTreeForTreeLayout<ItemToDisplay>(
+		DefaultTreeForTreeLayout<IItemToDisplay> tree = new DefaultTreeForTreeLayout<IItemToDisplay>(
 				root);
 		tree.addChild(root, n1);
 		tree.addChild(n1, n1_3);

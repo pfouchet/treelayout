@@ -35,7 +35,7 @@ import javafx.stage.Stage;
 import org.abego.treelayout.Configuration;
 import org.abego.treelayout.TreeForTreeLayout;
 import org.abego.treelayout.TreeLayout;
-import org.abego.treelayout.demo.ItemToDisplay;
+import org.abego.treelayout.demo.IItemToDisplay;
 import org.abego.treelayout.demo.SampleTreeFactory;
 import org.abego.treelayout.demo.TextInBoxNodeExtentProvider;
 import org.abego.treelayout.util.DefaultConfiguration;
@@ -43,20 +43,20 @@ import org.abego.treelayout.util.DefaultConfiguration;
 public class Demo extends Application {
 
 	public void start(Stage primaryStage) throws Exception {
-		TreeForTreeLayout<ItemToDisplay> tree = SampleTreeFactory.createSampleTree2();
+		TreeForTreeLayout<IItemToDisplay> tree = SampleTreeFactory.createSampleTree2();
 
 		// TODO replace by getter/setter so that it can be updated at runtime
 		// setup the tree layout configuration
 		double gapBetweenLevels = 150;
 		double gapBetweenCenterOfNodes = 50;
-		DefaultConfiguration<ItemToDisplay> configuration = new DefaultConfiguration<ItemToDisplay>(
+		DefaultConfiguration<IItemToDisplay> configuration = new DefaultConfiguration<IItemToDisplay>(
 				gapBetweenLevels, gapBetweenCenterOfNodes, Configuration.Location.Left);
 
 		// create the NodeExtentProvider for ItemToDisplay nodes
 		TextInBoxNodeExtentProvider nodeExtentProvider = new TextInBoxNodeExtentProvider();
 
 		// create the layout
-		TreeLayout<ItemToDisplay> treeLayout = new TreeLayout<ItemToDisplay>(tree,
+		TreeLayout<IItemToDisplay> treeLayout = new TreeLayout<IItemToDisplay>(tree,
 				nodeExtentProvider, configuration);
 
 		// Create a panel that draws the nodes and edges and show the panel

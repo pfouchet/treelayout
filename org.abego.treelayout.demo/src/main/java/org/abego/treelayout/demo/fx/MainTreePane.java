@@ -33,11 +33,11 @@ import javafx.scene.layout.Pane;
 import javafx.scene.shape.Line;
 import org.abego.treelayout.TreeForTreeLayout;
 import org.abego.treelayout.TreeLayout;
-import org.abego.treelayout.demo.ItemToDisplay;
+import org.abego.treelayout.demo.IItemToDisplay;
 
 public class MainTreePane extends Pane {
 	private static final int Y_OFFSET = 20;
-	private final TreeLayout<ItemToDisplay> treeLayout;
+	private final TreeLayout<IItemToDisplay> treeLayout;
 
 
 	/**
@@ -46,36 +46,36 @@ public class MainTreePane extends Pane {
 	 *
 	 * @param treeLayout the {@link TreeLayout} to be displayed
 	 */
-	public MainTreePane(TreeLayout<ItemToDisplay> treeLayout) {
+	public MainTreePane(TreeLayout<IItemToDisplay> treeLayout) {
 		this.treeLayout = treeLayout;
 
 		paintEdges(getTree().getRoot());
 
 		// paint the boxes
-		for (ItemToDisplay itemToDisplay : treeLayout.getNodeBounds().keySet()) {
+		for (IItemToDisplay itemToDisplay : treeLayout.getNodeBounds().keySet()) {
 			paintBox(itemToDisplay);
 		}
 	}
 
-	private TreeForTreeLayout<ItemToDisplay> getTree() {
+	private TreeForTreeLayout<IItemToDisplay> getTree() {
 		return treeLayout.getTree();
 	}
 
-	private Iterable<ItemToDisplay> getChildren(ItemToDisplay parent) {
+	private Iterable<IItemToDisplay> getChildren(IItemToDisplay parent) {
 		return getTree().getChildren(parent);
 	}
 
-	private TreeLayout.Rectangle2DCustom getBoundsOfNode(ItemToDisplay node) {
+	private TreeLayout.Rectangle2DCustom getBoundsOfNode(IItemToDisplay node) {
 		return treeLayout.getNodeBounds().get(node);
 	}
 
-	private void paintEdges(ItemToDisplay parent) {
+	private void paintEdges(IItemToDisplay parent) {
 
 		if (!getTree().isLeaf(parent)) {
 			TreeLayout.Rectangle2DCustom b1 = getBoundsOfNode(parent);
 			double x1 = b1.getCenterX();
 			double y1 = b1.getCenterY();
-			for (ItemToDisplay child : getChildren(parent)) {
+			for (IItemToDisplay child : getChildren(parent)) {
 				TreeLayout.Rectangle2DCustom b2 = getBoundsOfNode(child);
 				getChildren().add(new Line((int) x1 + getXOffset(), (int) y1 + getYOffset(), (int) b2.getCenterX() + getXOffset(),
 						(int) b2.getCenterY() + getYOffset()));
@@ -93,7 +93,7 @@ public class MainTreePane extends Pane {
 		return 20;
 	}
 
-	private void paintBox(ItemToDisplay itemToDisplay) {
+	private void paintBox(IItemToDisplay itemToDisplay) {
 		TreeLayout.Rectangle2DCustom box = getBoundsOfNode(itemToDisplay);
 		getChildren().add(itemToDisplay.getItem());
 
