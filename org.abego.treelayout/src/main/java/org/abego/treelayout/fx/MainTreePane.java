@@ -94,10 +94,11 @@ public class MainTreePane extends Pane {
 
 	private void paintBox(IItemToDisplay itemToDisplay) {
 		TreeLayout.Rectangle2DCustom box = getBoundsOfNode(itemToDisplay);
-		getChildren().add(itemToDisplay.getItem());
+		Pane item = itemToDisplay.getItem();
+		getChildren().add(item);
 
-		itemToDisplay.getItem().setLayoutX(box.getCenterX() + getXOffset());
-		itemToDisplay.getItem().setLayoutY(box.getCenterY() + getYOffset());
-
+		item.setLayoutX(box.getX() + getXOffset());
+		item.setLayoutY(box.getY() + getYOffset());
+		item.toFront();
 	}
 }

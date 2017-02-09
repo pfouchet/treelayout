@@ -48,7 +48,7 @@ public class Demo extends Application {
 
 		// setup the tree layout configuration
 		double gapBetweenLevels = 150;
-		double gapBetweenCenterOfNodes = 50;
+		double gapBetweenCenterOfNodes = 60;
 		DefaultConfiguration<IItemToDisplay> configuration = new DefaultConfiguration<IItemToDisplay>(
 				gapBetweenLevels, gapBetweenCenterOfNodes, Configuration.Location.Left);
 

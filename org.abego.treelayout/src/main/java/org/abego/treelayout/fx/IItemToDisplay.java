@@ -1,10 +1,10 @@
 package org.abego.treelayout.fx;
 
-import javafx.scene.shape.Shape;
+import javafx.scene.layout.Pane;
 
 public interface IItemToDisplay {
 
-	Shape getItem();
+	Pane getItem();
 
 	double getWidth();
 
