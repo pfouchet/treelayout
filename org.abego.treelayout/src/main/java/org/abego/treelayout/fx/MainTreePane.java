@@ -85,11 +85,11 @@ public class MainTreePane extends Pane {
 	}
 
 	private int getYOffset() {
-		return Y_OFFSET;
+		return 0;
 	}
 
 	private int getXOffset() {
-		return 20;
+		return 0;
 	}
 
 	private void paintBox(IItemToDisplay itemToDisplay) {
