@@ -35,9 +35,10 @@ import javafx.stage.Stage;
 import org.abego.treelayout.Configuration;
 import org.abego.treelayout.TreeForTreeLayout;
 import org.abego.treelayout.TreeLayout;
-import org.abego.treelayout.demo.IItemToDisplay;
 import org.abego.treelayout.demo.SampleTreeFactory;
-import org.abego.treelayout.demo.TextInBoxNodeExtentProvider;
+import org.abego.treelayout.fx.IItemToDisplay;
+import org.abego.treelayout.fx.MainTreePane;
+import org.abego.treelayout.fx.TextInBoxNodeExtentProvider;
 import org.abego.treelayout.util.DefaultConfiguration;
 
 public class Demo extends Application {
@@ -45,7 +46,6 @@ public class Demo extends Application {
 	public void start(Stage primaryStage) throws Exception {
 		TreeForTreeLayout<IItemToDisplay> tree = SampleTreeFactory.createSampleTree2();
 
-		// TODO replace by getter/setter so that it can be updated at runtime
 		// setup the tree layout configuration
 		double gapBetweenLevels = 150;
 		double gapBetweenCenterOfNodes = 50;

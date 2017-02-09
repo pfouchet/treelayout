@@ -1,4 +1,4 @@
-package org.abego.treelayout.demo;
+package org.abego.treelayout.fx;
 
 import javafx.scene.shape.Shape;
 

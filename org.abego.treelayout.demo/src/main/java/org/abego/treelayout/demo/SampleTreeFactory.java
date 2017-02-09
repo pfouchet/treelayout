@@ -31,6 +31,8 @@ package org.abego.treelayout.demo;
 
 import javafx.scene.paint.Color;
 import org.abego.treelayout.TreeForTreeLayout;
+import org.abego.treelayout.fx.IItemToDisplay;
+import org.abego.treelayout.fx.ItemToDisplay;
 import org.abego.treelayout.util.DefaultTreeForTreeLayout;
 
 /**

@@ -27,7 +27,7 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE 
  * POSSIBILITY OF SUCH DAMAGE.
  */
-package org.abego.treelayout.demo;
+package org.abego.treelayout.fx;
 
 import org.abego.treelayout.NodeExtentProvider;
 

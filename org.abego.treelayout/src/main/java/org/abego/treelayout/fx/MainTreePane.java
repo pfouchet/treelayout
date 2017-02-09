@@ -27,13 +27,12 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE 
  * POSSIBILITY OF SUCH DAMAGE.
  */
-package org.abego.treelayout.demo.fx;
+package org.abego.treelayout.fx;
 
 import javafx.scene.layout.Pane;
 import javafx.scene.shape.Line;
 import org.abego.treelayout.TreeForTreeLayout;
 import org.abego.treelayout.TreeLayout;
-import org.abego.treelayout.demo.IItemToDisplay;
 
 public class MainTreePane extends Pane {
 	private static final int Y_OFFSET = 20;
